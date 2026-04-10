@@ -57,7 +57,7 @@ namespace margelo::nitro::nitrosqlite {
     void open(const std::string& path) override;
     void close() override;
     QueryResult execute(const std::string& query, const std::vector<std::string>& params) override;
-    void transaction(const std::vector<std::string>& queries) override;
+    void transaction(const std::vector<TransactionQuery>& queries) override;
 
   private:
     jni::global_ref<JHybridSqliteSpec::JavaPart> _javaPart;

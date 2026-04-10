@@ -18,6 +18,8 @@ namespace margelo::nitro::nitrosqlite { struct QueryResult; }
 namespace margelo::nitro::nitrosqlite { struct Row; }
 // Forward declaration of `RowValue` to properly resolve imports.
 namespace margelo::nitro::nitrosqlite { struct RowValue; }
+// Forward declaration of `TransactionQuery` to properly resolve imports.
+namespace margelo::nitro::nitrosqlite { struct TransactionQuery; }
 
 #include <string>
 #include "QueryResult.hpp"
@@ -27,6 +29,7 @@ namespace margelo::nitro::nitrosqlite { struct RowValue; }
 #include <NitroModules/Null.hpp>
 #include <variant>
 #include <optional>
+#include "TransactionQuery.hpp"
 
 #include "NitroSqlite-Swift-Cxx-Umbrella.hpp"
 
@@ -98,7 +101,7 @@ namespace margelo::nitro::nitrosqlite {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline void transaction(const std::vector<std::string>& queries) override {
+    inline void transaction(const std::vector<TransactionQuery>& queries) override {
       auto __result = _swiftPart.transaction(queries);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

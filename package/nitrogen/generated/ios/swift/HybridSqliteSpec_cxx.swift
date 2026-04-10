@@ -159,9 +159,9 @@ open class HybridSqliteSpec_cxx {
   }
   
   @inline(__always)
-  public final func transaction(queries: bridge.std__vector_std__string_) -> bridge.Result_void_ {
+  public final func transaction(queries: bridge.std__vector_TransactionQuery_) -> bridge.Result_void_ {
     do {
-      try self.__implementation.transaction(queries: queries.map({ __item in String(__item) }))
+      try self.__implementation.transaction(queries: queries.map({ __item in __item }))
       return bridge.create_Result_void_()
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()

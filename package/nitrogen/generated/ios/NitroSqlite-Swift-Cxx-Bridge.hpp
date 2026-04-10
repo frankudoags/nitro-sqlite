@@ -16,6 +16,8 @@ namespace margelo::nitro::nitrosqlite { struct QueryResult; }
 namespace margelo::nitro::nitrosqlite { struct RowValue; }
 // Forward declaration of `Row` to properly resolve imports.
 namespace margelo::nitro::nitrosqlite { struct Row; }
+// Forward declaration of `TransactionQuery` to properly resolve imports.
+namespace margelo::nitro::nitrosqlite { struct TransactionQuery; }
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridSqliteSpec_cxx` to properly resolve imports.
@@ -26,6 +28,7 @@ namespace NitroSqlite { class HybridSqliteSpec_cxx; }
 #include "QueryResult.hpp"
 #include "Row.hpp"
 #include "RowValue.hpp"
+#include "TransactionQuery.hpp"
 #include <NitroModules/Null.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
@@ -206,6 +209,17 @@ namespace margelo::nitro::nitrosqlite::bridge::swift {
   using std__vector_std__string_ = std::vector<std::string>;
   inline std::vector<std::string> create_std__vector_std__string_(size_t size) noexcept {
     std::vector<std::string> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::vector<TransactionQuery>
+  /**
+   * Specialized version of `std::vector<TransactionQuery>`.
+   */
+  using std__vector_TransactionQuery_ = std::vector<TransactionQuery>;
+  inline std::vector<TransactionQuery> create_std__vector_TransactionQuery_(size_t size) noexcept {
+    std::vector<TransactionQuery> vector;
     vector.reserve(size);
     return vector;
   }

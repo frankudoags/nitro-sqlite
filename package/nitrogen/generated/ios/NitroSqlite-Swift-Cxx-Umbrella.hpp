@@ -16,12 +16,15 @@ namespace margelo::nitro::nitrosqlite { struct QueryResult; }
 namespace margelo::nitro::nitrosqlite { struct RowValue; }
 // Forward declaration of `Row` to properly resolve imports.
 namespace margelo::nitro::nitrosqlite { struct Row; }
+// Forward declaration of `TransactionQuery` to properly resolve imports.
+namespace margelo::nitro::nitrosqlite { struct TransactionQuery; }
 
 // Include C++ defined types
 #include "HybridSqliteSpec.hpp"
 #include "QueryResult.hpp"
 #include "Row.hpp"
 #include "RowValue.hpp"
+#include "TransactionQuery.hpp"
 #include <NitroModules/Null.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>

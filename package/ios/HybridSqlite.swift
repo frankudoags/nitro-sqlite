@@ -32,32 +32,78 @@ class HybridSqlite: HybridSqliteSpec {
         }
 
         // Execute the statement and collect results
-        var results: [[String: Any]] = []
+        var rows: [Row] = []
         while sqlite3_step(stmt) == SQLITE_ROW {
-            var row: [String: Any] = [:]
             let columnCount = sqlite3_column_count(stmt)
             for i in 0..<columnCount {
                 let columnName = String(cString: sqlite3_column_name(stmt, i))
+                let rowValue: RowValue
                 let columnType = sqlite3_column_type(stmt, i)
                 switch columnType {
-                case SQLITE_INTEGER:
-                    row[columnName] = sqlite3_column_int64(stmt, i)
-                case SQLITE_FLOAT:
-                    row[columnName] = sqlite3_column_double(stmt, i)
+                case SQLITE_INTEGER, SQLITE_FLOAT:
+                    let num = sqlite3_column_double(stmt, i)
+                    rowValue = RowValue(
+                        stringValue: .first(NullType.null),
+                        numberValue: .second(num),
+                        boolValue: .first(NullType.null)
+                    )
                 case SQLITE_TEXT:
-                    row[columnName] = String(cString: sqlite3_column_text(stmt, i))
+                    let text = String(cString: sqlite3_column_text(stmt, i))
+                    rowValue = RowValue(
+                        stringValue: .second(text),
+                        numberValue: .first(NullType.null),
+                        boolValue: .first(NullType.null)
+                    )
                 case SQLITE_NULL:
-                    row[columnName] = nil
+                    rowValue = RowValue(
+                        stringValue: .first(NullType.null),
+                        numberValue: .first(NullType.null),
+                        boolValue: .first(NullType.null)
+                    )
                 default:
-                    row[columnName] = nil   
+                    rowValue = RowValue(
+                        stringValue: .first(NullType.null),
+                        numberValue: .first(NullType.null),
+                        boolValue: .first(NullType.null)
+                    )
                 }
+                
+                // append the row to the results
+                rows.append(Row(columnName: columnName, value: rowValue))
             }
-            results.append(row)
         }
 
+        // finish the statement
+        sqlite3_finalize(stmt)
+
+        // return the query result
+        return QueryResult(
+                rows: rows,
+                rowsAffected: Double(sqlite3_changes(db)),
+                insertId: Double(sqlite3_last_insert_rowid(db))
+        
+                )
     }
-    
+    /**
+    That's excellent. execute is complete and correct.
+Now implement transaction. The pattern is:
+
+Call execute(query: "BEGIN", params: [])
+Loop through queries calling execute on each
+If all succeed, call execute(query: "COMMIT", params: [])
+If anything throws, catch it, call execute(query: "ROLLBACK", params: []), then rethrow
+    */
     func transaction(queries: [String]) throws {
-        <#code#>
+        do {
+            try execute(query: "BEGIN", params: [])
+            for query in queries {
+                try execute(query: query, params: [])
+            }
+            try execute(query: "COMMIT", params: [])
+        } catch {
+            try? execute(query: "ROLLBACK", params: [])
+            throw error
+        }
+
     }
 }

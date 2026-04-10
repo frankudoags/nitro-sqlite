@@ -21,6 +21,11 @@ export interface QueryResult {
   insertId?: number
 }
 
+export interface TransactionQuery {
+  query: string
+  params: string[]
+}
+
 export interface Sqlite extends HybridObject<{
   ios: 'swift'
   android: 'kotlin'
@@ -28,5 +33,5 @@ export interface Sqlite extends HybridObject<{
   open(path: string): void
   close(): void
   execute(query: string, params: string[]): QueryResult
-  transaction(queries: string[]): void
+  transaction(queries: TransactionQuery[]): void
 }

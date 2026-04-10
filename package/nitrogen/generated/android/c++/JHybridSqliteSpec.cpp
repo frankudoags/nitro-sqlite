@@ -13,6 +13,8 @@ namespace margelo::nitro::nitrosqlite { struct QueryResult; }
 namespace margelo::nitro::nitrosqlite { struct Row; }
 // Forward declaration of `RowValue` to properly resolve imports.
 namespace margelo::nitro::nitrosqlite { struct RowValue; }
+// Forward declaration of `TransactionQuery` to properly resolve imports.
+namespace margelo::nitro::nitrosqlite { struct TransactionQuery; }
 
 #include "QueryResult.hpp"
 #include "JQueryResult.hpp"
@@ -29,6 +31,8 @@ namespace margelo::nitro::nitrosqlite { struct RowValue; }
 #include <NitroModules/JNull.hpp>
 #include "JNumberValue.hpp"
 #include "JBoolValue.hpp"
+#include "TransactionQuery.hpp"
+#include "JTransactionQuery.hpp"
 
 namespace margelo::nitro::nitrosqlite {
 
@@ -85,14 +89,14 @@ namespace margelo::nitro::nitrosqlite {
     }());
     return __result->toCpp();
   }
-  void JHybridSqliteSpec::transaction(const std::vector<std::string>& queries) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JArrayClass<jni::JString>> /* queries */)>("transaction");
+  void JHybridSqliteSpec::transaction(const std::vector<TransactionQuery>& queries) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JArrayClass<JTransactionQuery>> /* queries */)>("transaction");
     method(_javaPart, [&]() {
       size_t __size = queries.size();
-      jni::local_ref<jni::JArrayClass<jni::JString>> __array = jni::JArrayClass<jni::JString>::newArray(__size);
+      jni::local_ref<jni::JArrayClass<JTransactionQuery>> __array = jni::JArrayClass<JTransactionQuery>::newArray(__size);
       for (size_t __i = 0; __i < __size; __i++) {
         const auto& __element = queries[__i];
-        auto __elementJni = jni::make_jstring(__element);
+        auto __elementJni = JTransactionQuery::fromCpp(__element);
         __array->setElement(__i, *__elementJni);
       }
       return __array;
