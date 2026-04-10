@@ -10,9 +10,9 @@
 #include <fbjni/fbjni.h>
 #include "RowValue.hpp"
 
-#include "JVariant_NullType_Boolean.hpp"
-#include "JVariant_NullType_Double.hpp"
-#include "JVariant_NullType_String.hpp"
+#include "JBoolValue.hpp"
+#include "JNumberValue.hpp"
+#include "JStringValue.hpp"
 #include <NitroModules/JNull.hpp>
 #include <NitroModules/Null.hpp>
 #include <optional>
@@ -38,12 +38,12 @@ namespace margelo::nitro::nitrosqlite {
     [[nodiscard]]
     RowValue toCpp() const {
       static const auto clazz = javaClassStatic();
-      static const auto fieldStringValue = clazz->getField<JVariant_NullType_String>("stringValue");
-      jni::local_ref<JVariant_NullType_String> stringValue = this->getFieldValue(fieldStringValue);
-      static const auto fieldNumberValue = clazz->getField<JVariant_NullType_Double>("numberValue");
-      jni::local_ref<JVariant_NullType_Double> numberValue = this->getFieldValue(fieldNumberValue);
-      static const auto fieldBoolValue = clazz->getField<JVariant_NullType_Boolean>("boolValue");
-      jni::local_ref<JVariant_NullType_Boolean> boolValue = this->getFieldValue(fieldBoolValue);
+      static const auto fieldStringValue = clazz->getField<JStringValue>("stringValue");
+      jni::local_ref<JStringValue> stringValue = this->getFieldValue(fieldStringValue);
+      static const auto fieldNumberValue = clazz->getField<JNumberValue>("numberValue");
+      jni::local_ref<JNumberValue> numberValue = this->getFieldValue(fieldNumberValue);
+      static const auto fieldBoolValue = clazz->getField<JBoolValue>("boolValue");
+      jni::local_ref<JBoolValue> boolValue = this->getFieldValue(fieldBoolValue);
       return RowValue(
         stringValue != nullptr ? std::make_optional(stringValue->toCpp()) : std::nullopt,
         numberValue != nullptr ? std::make_optional(numberValue->toCpp()) : std::nullopt,
@@ -57,14 +57,14 @@ namespace margelo::nitro::nitrosqlite {
      */
     [[maybe_unused]]
     static jni::local_ref<JRowValue::javaobject> fromCpp(const RowValue& value) {
-      using JSignature = JRowValue(jni::alias_ref<JVariant_NullType_String>, jni::alias_ref<JVariant_NullType_Double>, jni::alias_ref<JVariant_NullType_Boolean>);
+      using JSignature = JRowValue(jni::alias_ref<JStringValue>, jni::alias_ref<JNumberValue>, jni::alias_ref<JBoolValue>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
-        value.stringValue.has_value() ? JVariant_NullType_String::fromCpp(value.stringValue.value()) : nullptr,
-        value.numberValue.has_value() ? JVariant_NullType_Double::fromCpp(value.numberValue.value()) : nullptr,
-        value.boolValue.has_value() ? JVariant_NullType_Boolean::fromCpp(value.boolValue.value()) : nullptr
+        value.stringValue.has_value() ? JStringValue::fromCpp(value.stringValue.value()) : nullptr,
+        value.numberValue.has_value() ? JNumberValue::fromCpp(value.numberValue.value()) : nullptr,
+        value.boolValue.has_value() ? JBoolValue::fromCpp(value.boolValue.value()) : nullptr
       );
     }
   };

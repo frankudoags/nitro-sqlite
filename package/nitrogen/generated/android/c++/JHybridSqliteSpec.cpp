@@ -25,10 +25,10 @@ namespace margelo::nitro::nitrosqlite { struct RowValue; }
 #include <NitroModules/Null.hpp>
 #include <variant>
 #include <optional>
-#include "JVariant_NullType_String.hpp"
+#include "JStringValue.hpp"
 #include <NitroModules/JNull.hpp>
-#include "JVariant_NullType_Double.hpp"
-#include "JVariant_NullType_Boolean.hpp"
+#include "JNumberValue.hpp"
+#include "JBoolValue.hpp"
 
 namespace margelo::nitro::nitrosqlite {
 

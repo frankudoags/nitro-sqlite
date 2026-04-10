@@ -36,9 +36,9 @@ target_sources(
   ../nitrogen/generated/shared/c++/HybridSqliteSpec.cpp
   # Android-specific Nitrogen C++ sources
   ../nitrogen/generated/android/c++/JHybridSqliteSpec.cpp
-  ../nitrogen/generated/android/c++/JVariant_NullType_String.cpp
-  ../nitrogen/generated/android/c++/JVariant_NullType_Double.cpp
-  ../nitrogen/generated/android/c++/JVariant_NullType_Boolean.cpp
+  ../nitrogen/generated/android/c++/JStringValue.cpp
+  ../nitrogen/generated/android/c++/JNumberValue.cpp
+  ../nitrogen/generated/android/c++/JBoolValue.cpp
 )
 
 # From node_modules/react-native/ReactAndroid/cmake-utils/folly-flags.cmake

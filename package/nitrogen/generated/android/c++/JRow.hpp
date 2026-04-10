@@ -10,10 +10,10 @@
 #include <fbjni/fbjni.h>
 #include "Row.hpp"
 
+#include "JBoolValue.hpp"
+#include "JNumberValue.hpp"
 #include "JRowValue.hpp"
-#include "JVariant_NullType_Boolean.hpp"
-#include "JVariant_NullType_Double.hpp"
-#include "JVariant_NullType_String.hpp"
+#include "JStringValue.hpp"
 #include "RowValue.hpp"
 #include <NitroModules/JNull.hpp>
 #include <NitroModules/Null.hpp>

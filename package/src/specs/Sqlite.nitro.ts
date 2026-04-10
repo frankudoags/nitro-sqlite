@@ -1,9 +1,13 @@
 import type { HybridObject } from 'react-native-nitro-modules'
 
+export type StringValue = string | null
+export type NumberValue = number | null
+export type BoolValue = boolean | null
+
 export interface RowValue {
-  stringValue: string | null
-  numberValue: number | null
-  boolValue: boolean | null
+  stringValue: StringValue
+  numberValue: NumberValue  
+  boolValue: BoolValue
 }
 
 export interface Row {

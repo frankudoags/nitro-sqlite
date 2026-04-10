@@ -19,13 +19,13 @@ import com.margelo.nitro.core.NullType
 data class RowValue(
   @DoNotStrip
   @Keep
-  val stringValue: Variant_NullType_String?,
+  val stringValue: StringValue?,
   @DoNotStrip
   @Keep
-  val numberValue: Variant_NullType_Double?,
+  val numberValue: NumberValue?,
   @DoNotStrip
   @Keep
-  val boolValue: Variant_NullType_Boolean?
+  val boolValue: BoolValue?
 ) {
   /* primary constructor */
 
@@ -37,7 +37,7 @@ data class RowValue(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(stringValue: Variant_NullType_String?, numberValue: Variant_NullType_Double?, boolValue: Variant_NullType_Boolean?): RowValue {
+    private fun fromCpp(stringValue: StringValue?, numberValue: NumberValue?, boolValue: BoolValue?): RowValue {
       return RowValue(stringValue, numberValue, boolValue)
     }
   }
