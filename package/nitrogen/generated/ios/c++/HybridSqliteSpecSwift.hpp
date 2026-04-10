@@ -90,7 +90,7 @@ namespace margelo::nitro::nitrosqlite {
         std::rethrow_exception(__result.error());
       }
     }
-    inline QueryResult execute(const std::string& query, const std::optional<std::vector<std::variant<nitro::NullType, bool, std::string, double>>>& params) override {
+    inline QueryResult execute(const std::string& query, const std::vector<std::string>& params) override {
       auto __result = _swiftPart.execute(query, params);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

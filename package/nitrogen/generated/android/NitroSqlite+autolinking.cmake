@@ -39,7 +39,6 @@ target_sources(
   ../nitrogen/generated/android/c++/JVariant_NullType_String.cpp
   ../nitrogen/generated/android/c++/JVariant_NullType_Double.cpp
   ../nitrogen/generated/android/c++/JVariant_NullType_Boolean.cpp
-  ../nitrogen/generated/android/c++/JVariant_NullType_Boolean_String_Double.cpp
 )
 
 # From node_modules/react-native/ReactAndroid/cmake-utils/folly-flags.cmake

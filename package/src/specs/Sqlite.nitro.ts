@@ -25,7 +25,7 @@ export interface Sqlite extends HybridObject<{
   close(): void
   execute(
     query: string,
-    params?: string[]
+    params: string[]
   ): QueryResult
   transaction(queries: string[]): void
 }

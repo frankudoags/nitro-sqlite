@@ -29,7 +29,6 @@ namespace margelo::nitro::nitrosqlite { struct RowValue; }
 #include <NitroModules/JNull.hpp>
 #include "JVariant_NullType_Double.hpp"
 #include "JVariant_NullType_Boolean.hpp"
-#include "JVariant_NullType_Boolean_String_Double.hpp"
 
 namespace margelo::nitro::nitrosqlite {
 
@@ -72,18 +71,18 @@ namespace margelo::nitro::nitrosqlite {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void()>("close");
     method(_javaPart);
   }
-  QueryResult JHybridSqliteSpec::execute(const std::string& query, const std::optional<std::vector<std::variant<nitro::NullType, bool, std::string, double>>>& params) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JQueryResult>(jni::alias_ref<jni::JString> /* query */, jni::alias_ref<jni::JArrayClass<JVariant_NullType_Boolean_String_Double>> /* params */)>("execute");
-    auto __result = method(_javaPart, jni::make_jstring(query), params.has_value() ? [&]() {
-      size_t __size = params.value().size();
-      jni::local_ref<jni::JArrayClass<JVariant_NullType_Boolean_String_Double>> __array = jni::JArrayClass<JVariant_NullType_Boolean_String_Double>::newArray(__size);
+  QueryResult JHybridSqliteSpec::execute(const std::string& query, const std::vector<std::string>& params) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JQueryResult>(jni::alias_ref<jni::JString> /* query */, jni::alias_ref<jni::JArrayClass<jni::JString>> /* params */)>("execute");
+    auto __result = method(_javaPart, jni::make_jstring(query), [&]() {
+      size_t __size = params.size();
+      jni::local_ref<jni::JArrayClass<jni::JString>> __array = jni::JArrayClass<jni::JString>::newArray(__size);
       for (size_t __i = 0; __i < __size; __i++) {
-        const auto& __element = params.value()[__i];
-        auto __elementJni = JVariant_NullType_Boolean_String_Double::fromCpp(__element);
+        const auto& __element = params[__i];
+        auto __elementJni = jni::make_jstring(__element);
         __array->setElement(__i, *__elementJni);
       }
       return __array;
-    }() : nullptr);
+    }());
     return __result->toCpp();
   }
   void JHybridSqliteSpec::transaction(const std::vector<std::string>& queries) {

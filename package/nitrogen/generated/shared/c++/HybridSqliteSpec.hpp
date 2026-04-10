@@ -18,10 +18,7 @@ namespace margelo::nitro::nitrosqlite { struct QueryResult; }
 
 #include <string>
 #include "QueryResult.hpp"
-#include <NitroModules/Null.hpp>
-#include <variant>
 #include <vector>
-#include <optional>
 
 namespace margelo::nitro::nitrosqlite {
 
@@ -56,7 +53,7 @@ namespace margelo::nitro::nitrosqlite {
       // Methods
       virtual void open(const std::string& path) = 0;
       virtual void close() = 0;
-      virtual QueryResult execute(const std::string& query, const std::optional<std::vector<std::variant<nitro::NullType, bool, std::string, double>>>& params) = 0;
+      virtual QueryResult execute(const std::string& query, const std::vector<std::string>& params) = 0;
       virtual void transaction(const std::vector<std::string>& queries) = 0;
 
     protected:

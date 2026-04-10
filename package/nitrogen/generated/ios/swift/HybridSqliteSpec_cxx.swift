@@ -147,34 +147,9 @@ open class HybridSqliteSpec_cxx {
   }
   
   @inline(__always)
-  public final func execute(query: std.string, params: bridge.std__optional_std__vector_std__variant_nitro__NullType__bool__std__string__double___) -> bridge.Result_QueryResult_ {
+  public final func execute(query: std.string, params: bridge.std__vector_std__string_) -> bridge.Result_QueryResult_ {
     do {
-      let __result = try self.__implementation.execute(query: String(query), params: { () -> [Variant_NullType_Bool_String_Double]? in
-        if bridge.has_value_std__optional_std__vector_std__variant_nitro__NullType__bool__std__string__double___(params) {
-          let __unwrapped = bridge.get_std__optional_std__vector_std__variant_nitro__NullType__bool__std__string__double___(params)
-          return __unwrapped.map({ __item in { () -> Variant_NullType_Bool_String_Double in
-            let __variant = bridge.std__variant_nitro__NullType__bool__std__string__double_(__item)
-            switch __variant.index() {
-              case 0:
-                let __actual = __variant.get_0()
-                return .first(NullType.null)
-              case 1:
-                let __actual = __variant.get_1()
-                return .second(__actual)
-              case 2:
-                let __actual = __variant.get_2()
-                return .third(String(__actual))
-              case 3:
-                let __actual = __variant.get_3()
-                return .fourth(__actual)
-              default:
-                fatalError("Variant can never have index \(__variant.index())!")
-            }
-          }() })
-        } else {
-          return nil
-        }
-      }())
+      let __result = try self.__implementation.execute(query: String(query), params: params.map({ __item in String(__item) }))
       let __resultCpp = __result
       return bridge.create_Result_QueryResult_(__resultCpp)
     } catch (let __error) {

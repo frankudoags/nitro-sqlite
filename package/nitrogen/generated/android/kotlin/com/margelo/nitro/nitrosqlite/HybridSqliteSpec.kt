@@ -10,7 +10,6 @@ package com.margelo.nitro.nitrosqlite
 import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.NullType
 import com.margelo.nitro.core.HybridObject
 
 /**
@@ -39,7 +38,7 @@ abstract class HybridSqliteSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun execute(query: String, params: Array<Variant_NullType_Boolean_String_Double>?): QueryResult
+  abstract fun execute(query: String, params: Array<String>): QueryResult
   
   @DoNotStrip
   @Keep

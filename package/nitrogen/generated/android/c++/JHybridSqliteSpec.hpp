@@ -56,7 +56,7 @@ namespace margelo::nitro::nitrosqlite {
     // Methods
     void open(const std::string& path) override;
     void close() override;
-    QueryResult execute(const std::string& query, const std::optional<std::vector<std::variant<nitro::NullType, bool, std::string, double>>>& params) override;
+    QueryResult execute(const std::string& query, const std::vector<std::string>& params) override;
     void transaction(const std::vector<std::string>& queries) override;
 
   private:
