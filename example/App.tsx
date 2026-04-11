@@ -1,15 +1,31 @@
 import { StatusBar } from "expo-status-bar";
 // @ts-ignore Local example app may not include react type declarations.
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import sqlite, { type QueryResult, type Row } from "nitro-sqlite";
+
+type TableData = {
+  columns: string[];
+  rows: string[][];
+};
 
 function extractPrimitive(value: unknown): string | number | boolean | null {
   if (value === null || value === undefined) {
     return null;
   }
 
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
     return value;
   }
 
@@ -17,10 +33,16 @@ function extractPrimitive(value: unknown): string | number | boolean | null {
     const objectValue = value as Record<string, unknown>;
 
     // Handles direct Nitro spec shape: { stringValue, numberValue, boolValue }
-    if (objectValue.stringValue !== null && objectValue.stringValue !== undefined) {
+    if (
+      objectValue.stringValue !== null &&
+      objectValue.stringValue !== undefined
+    ) {
       return extractPrimitive(objectValue.stringValue);
     }
-    if (objectValue.numberValue !== null && objectValue.numberValue !== undefined) {
+    if (
+      objectValue.numberValue !== null &&
+      objectValue.numberValue !== undefined
+    ) {
       return extractPrimitive(objectValue.numberValue);
     }
     if (objectValue.boolValue !== null && objectValue.boolValue !== undefined) {
@@ -47,11 +69,112 @@ function getRowPrimitive(row: Row): string | number | boolean | null {
   return extractPrimitive(row.value);
 }
 
-function formatRows(rows: Row[]): string {
-  if (rows.length === 0) {
-    return "No row values returned.";
+function toCellText(value: string | number | boolean | null): string {
+  if (value === null) {
+    return "NULL";
   }
-  return rows.map((row) => `${row.columnName}: ${String(getRowPrimitive(row))}`).join("\n");
+  return String(value);
+}
+
+function rowsToTable(rows: Row[]): TableData {
+  if (rows.length === 0) {
+    return { columns: [], rows: [] };
+  }
+
+  const seen = new Set<string>();
+  const columns: string[] = [];
+
+  for (const cell of rows) {
+    if (!seen.has(cell.columnName)) {
+      seen.add(cell.columnName);
+      columns.push(cell.columnName);
+    }
+  }
+
+  if (columns.length === 0) {
+    return { columns: [], rows: [] };
+  }
+
+  const recordMaps: Record<string, string>[] = [];
+  let current: Record<string, string> = {};
+
+  for (const cell of rows) {
+    const value = toCellText(getRowPrimitive(cell));
+    if (Object.prototype.hasOwnProperty.call(current, cell.columnName)) {
+      recordMaps.push(current);
+      current = {};
+    }
+    current[cell.columnName] = value;
+
+    if (Object.keys(current).length === columns.length) {
+      recordMaps.push(current);
+      current = {};
+    }
+  }
+
+  if (Object.keys(current).length > 0) {
+    recordMaps.push(current);
+  }
+
+  return {
+    columns,
+    rows: recordMaps.map((record) =>
+      columns.map((column) => record[column] ?? ""),
+    ),
+  };
+}
+
+function renderAsciiTable(table: TableData): string {
+  if (table.columns.length === 0 || table.rows.length === 0) {
+    return "No rows to render for this query.";
+  }
+
+  const widths = table.columns.map((column, columnIndex) => {
+    const cellMax = table.rows.reduce(
+      (max, row) => Math.max(max, (row[columnIndex] ?? "").length),
+      0,
+    );
+    return Math.min(Math.max(column.length, cellMax, 4), 28);
+  });
+
+  const divider = `+${widths.map((width) => "-".repeat(width + 2)).join("+")}+`;
+  const formatRow = (cells: string[]) =>
+    `| ${cells
+      .map((cell, index) => {
+        const normalized =
+          cell.length > widths[index]
+            ? `${cell.slice(0, widths[index] - 1)}.`
+            : cell;
+        return normalized.padEnd(widths[index], " ");
+      })
+      .join(" | ")} |`;
+
+  const lines: string[] = [];
+  lines.push(divider);
+  lines.push(formatRow(table.columns));
+  lines.push(divider);
+  for (const row of table.rows) {
+    lines.push(formatRow(row));
+  }
+  lines.push(divider);
+  return lines.join("\n");
+}
+
+function readTableNames(): string[] {
+  const result = sqlite.execute(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
+    [],
+  );
+
+  const table = rowsToTable(result.rows);
+  const nameIndex = table.columns.indexOf("name");
+  if (nameIndex < 0) {
+    return [];
+  }
+
+  return table.rows
+    .map((row) => row[nameIndex])
+    .filter((name) => name.trim().length > 0);
 }
 
 function seedDemoData(): void {
@@ -61,15 +184,29 @@ function seedDemoData(): void {
   );
 
   const countResult = sqlite.execute("SELECT COUNT(*) AS total FROM users", []);
-  const countValue = countResult.rows[0] ? getRowPrimitive(countResult.rows[0]) : 0;
+  const countValue = countResult.rows[0]
+    ? getRowPrimitive(countResult.rows[0])
+    : 0;
   const existingCount = Number(countValue ?? 0);
 
   if (existingCount === 0) {
     sqlite.transaction([
-      { query: "INSERT INTO users (name, age, active) VALUES (?, ?, ?)", params: ["Ada", "36", "1"] },
-      { query: "INSERT INTO users (name, age, active) VALUES (?, ?, ?)", params: ["Grace", "42", "0"] },
-      { query: "INSERT INTO users (name, age, active) VALUES (?, ?, ?)", params: ["Linus", "31", "1"] },
-      { query: "INSERT INTO users (name, age, active) VALUES (?, ?, ?)", params: ["Maya", "28", "1"] },
+      {
+        query: "INSERT INTO users (name, age, active) VALUES (?, ?, ?)",
+        params: ["Ada", "36", "1"],
+      },
+      {
+        query: "INSERT INTO users (name, age, active) VALUES (?, ?, ?)",
+        params: ["Grace", "42", "0"],
+      },
+      {
+        query: "INSERT INTO users (name, age, active) VALUES (?, ?, ?)",
+        params: ["Linus", "31", "1"],
+      },
+      {
+        query: "INSERT INTO users (name, age, active) VALUES (?, ?, ?)",
+        params: ["Maya", "28", "1"],
+      },
     ]);
   }
 }
@@ -105,10 +242,17 @@ function executeQuery(query: string, paramsText: string): QueryResult {
 function useSqlitePlayground() {
   const [dbReady, setDbReady] = React.useState(false);
   const [status, setStatus] = React.useState("Booting SQLite playground...");
-  const [query, setQuery] = React.useState("SELECT id, name, age, active FROM users ORDER BY id DESC");
+  const [query, setQuery] = React.useState(
+    "SELECT id, name, age, active FROM users ORDER BY id DESC",
+  );
   const [paramsText, setParamsText] = React.useState("");
+  const [sandboxInfo, setSandboxInfo] = React.useState(
+    "Sandbox: in-memory DB (:memory:), resets when app restarts.",
+  );
   const [resultMeta, setResultMeta] = React.useState("No query run yet.");
-  const [resultRows, setResultRows] = React.useState("Run a query to inspect raw rows.");
+  const [resultRows, setResultRows] = React.useState(
+    "No rows to render for this query.",
+  );
 
   React.useEffect(() => {
     let active = true;
@@ -117,14 +261,21 @@ function useSqlitePlayground() {
       sqlite.open(":memory:");
       seedDemoData();
 
-      const warmup = executeQuery("SELECT id, name, age, active FROM users ORDER BY id ASC", "");
+      const warmup = executeQuery(
+        "SELECT id, name, age, active FROM users ORDER BY id ASC",
+        "",
+      );
+      const tableNames = readTableNames();
       if (active) {
         setDbReady(true);
         setStatus("Ready. Write SQL and run it.");
+        setSandboxInfo(
+          `Sandbox: in-memory DB (:memory:), resets on app restart. Detected tables: ${tableNames.join(", ") || "none"}. Seeded users schema: users(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER, active INTEGER).`,
+        );
         setResultMeta(
           `Warmup SELECT finished. values=${warmup.rows.length}, rowsAffected=${warmup.rowsAffected}, insertId=${warmup.insertId ?? "-"}`,
         );
-        setResultRows(formatRows(warmup.rows));
+        setResultRows(renderAsciiTable(rowsToTable(warmup.rows)));
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -151,11 +302,15 @@ function useSqlitePlayground() {
 
     try {
       const result = executeQuery(query, paramsText);
+      const tableNames = readTableNames();
       setStatus("Query executed.");
+      setSandboxInfo(
+        `Sandbox: in-memory DB (:memory:), resets on app restart. Detected tables: ${tableNames.join(", ") || "none"}. Seeded users schema: users(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER, active INTEGER).`,
+      );
       setResultMeta(
         `values=${result.rows.length}, rowsAffected=${result.rowsAffected}, insertId=${result.insertId ?? "-"}`,
       );
-      setResultRows(formatRows(result.rows));
+      setResultRows(renderAsciiTable(rowsToTable(result.rows)));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setStatus(`SQLite error: ${message}`);
@@ -165,7 +320,9 @@ function useSqlitePlayground() {
   }, [dbReady, query, paramsText]);
 
   const loadSelectPreset = React.useCallback(() => {
-    setQuery("SELECT id, name, age, active FROM users WHERE active = ? ORDER BY age DESC");
+    setQuery(
+      "SELECT id, name, age, active FROM users WHERE active = ? ORDER BY age DESC",
+    );
     setParamsText("1");
   }, []);
 
@@ -174,10 +331,18 @@ function useSqlitePlayground() {
     setParamsText("Nova, 24, 1");
   }, []);
 
+  const loadSchemaPreset = React.useCallback(() => {
+    setQuery(
+      "SELECT name, type FROM sqlite_master WHERE type='table' ORDER BY name",
+    );
+    setParamsText("");
+  }, []);
+
   return {
     status,
     query,
     paramsText,
+    sandboxInfo,
     resultMeta,
     resultRows,
     setQuery,
@@ -185,6 +350,7 @@ function useSqlitePlayground() {
     run,
     loadSelectPreset,
     loadInsertPreset,
+    loadSchemaPreset,
   };
 }
 
@@ -193,6 +359,7 @@ export default function App() {
     status,
     query,
     paramsText,
+    sandboxInfo,
     resultMeta,
     resultRows,
     setQuery,
@@ -200,6 +367,7 @@ export default function App() {
     run,
     loadSelectPreset,
     loadInsertPreset,
+    loadSchemaPreset,
   } = useSqlitePlayground();
 
   return (
@@ -212,8 +380,10 @@ export default function App() {
           <Text style={styles.kicker}>NITRO SQL LAB</Text>
           <Text style={styles.title}>Write, Run, Inspect</Text>
           <Text style={styles.subtitle}>
-            Edit SQL below, pass params, and execute directly against the Nitro SQLite bridge.
+            Edit SQL below, pass params, and execute directly against the Nitro
+            SQLite bridge.
           </Text>
+          <Text style={styles.sandboxInfo}>{sandboxInfo}</Text>
           <Text style={styles.status}>{status}</Text>
         </View>
 
@@ -241,25 +411,27 @@ export default function App() {
             <Pressable style={styles.primaryButton} onPress={run}>
               <Text style={styles.primaryButtonText}>Run Query</Text>
             </Pressable>
-
-            <Pressable style={styles.ghostButton} onPress={loadSelectPreset}>
-              <Text style={styles.ghostButtonText}>Active Users Preset</Text>
+            {/* <Pressable style={styles.ghostButton} onPress={loadSelectPreset}>
+              <Text style={styles.ghostButtonText}>Preset: Select Active Users (param = 1)</Text>
             </Pressable>
 
             <Pressable style={styles.ghostButton} onPress={loadInsertPreset}>
-              <Text style={styles.ghostButtonText}>Insert Preset</Text>
+              <Text style={styles.ghostButtonText}>Preset: Insert User (Nova, 24, 1)</Text>
             </Pressable>
+
+            <Pressable style={styles.ghostButton} onPress={loadSchemaPreset}>
+              <Text style={styles.ghostButtonText}>Preset: Show Tables In Sandbox</Text>
+            </Pressable> */}
           </View>
         </View>
 
         <View style={styles.panel}>
+          <Text style={styles.resultHeader}>Query Result Table</Text>
+          <Text style={styles.resultRows}>{resultRows}</Text>
+        </View>
+        <View style={styles.panel}>
           <Text style={styles.resultHeader}>Result Meta</Text>
           <Text style={styles.resultMeta}>{resultMeta}</Text>
-        </View>
-
-        <View style={styles.panel}>
-          <Text style={styles.resultHeader}>Raw Rows</Text>
-          <Text style={styles.resultRows}>{resultRows}</Text>
         </View>
       </ScrollView>
 
@@ -328,6 +500,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 12,
+  },
+  sandboxInfo: {
+    color: "#9fc0e9",
+    fontSize: 12,
+    lineHeight: 18,
+    marginBottom: 8,
   },
   status: {
     fontSize: 14,
@@ -417,5 +595,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     fontFamily: "Menlo",
+    backgroundColor: "#0b1a31",
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#2e4f79",
   },
 });
