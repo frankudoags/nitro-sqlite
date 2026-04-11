@@ -42,7 +42,7 @@ abstract class HybridSqliteSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun transaction(queries: Array<TransactionQuery>): Unit
+  abstract fun transaction(queries: Array<TransactionQuery>): Array<QueryResult>
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

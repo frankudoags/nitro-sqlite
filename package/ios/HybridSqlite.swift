@@ -2,7 +2,10 @@ import Foundation
 import NitroModules
 import SQLite3
 
+private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+
 class HybridSqlite: HybridSqliteSpec {
+    
     private var db: OpaquePointer? = nil
     
     func open(path: String) throws {
@@ -28,7 +31,9 @@ class HybridSqlite: HybridSqliteSpec {
         
         // Bind parameters to the statement
         for (index, param) in params.enumerated() {
-            sqlite3_bind_text(stmt, Int32(index + 1), param, -1, nil)
+            // Use SQLITE_TRANSIENT so SQLite copies Swift string bytes immediately.
+            // Passing nil uses SQLITE_STATIC, which can leave SQLite with dangling pointers.
+            sqlite3_bind_text(stmt, Int32(index + 1), param, -1, SQLITE_TRANSIENT)
         }
 
         // Execute the statement and collect results
@@ -84,20 +89,14 @@ class HybridSqlite: HybridSqliteSpec {
         
                 )
     }
-    /**
-    That's excellent. execute is complete and correct.
-Now implement transaction. The pattern is:
 
-Call execute(query: "BEGIN", params: [])
-Loop through queries calling execute on each
-If all succeed, call execute(query: "COMMIT", params: [])
-If anything throws, catch it, call execute(query: "ROLLBACK", params: []), then rethrow
-    */
-    func transaction(queries: [String]) throws {
+    func transaction(queries: [TransactionQuery]) throws -> [QueryResult] {
+        var results: [QueryResult] = []
         do {
             try execute(query: "BEGIN", params: [])
             for query in queries {
-                try execute(query: query, params: [])
+                let result = try execute(query: query.query, params: query.params)
+                results.append(result)
             }
             try execute(query: "COMMIT", params: [])
         } catch {
@@ -105,5 +104,6 @@ If anything throws, catch it, call execute(query: "ROLLBACK", params: []), then 
             throw error
         }
 
+        return results
     }
 }

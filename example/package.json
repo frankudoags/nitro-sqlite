@@ -1,7 +1,7 @@
 {
   "name": "react-native-nitro-sqlite",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "start": "expo start",
     "prebuild": "expo prebuild --clean",

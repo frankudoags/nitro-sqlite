@@ -213,6 +213,17 @@ namespace margelo::nitro::nitrosqlite::bridge::swift {
     return vector;
   }
   
+  // pragma MARK: std::vector<QueryResult>
+  /**
+   * Specialized version of `std::vector<QueryResult>`.
+   */
+  using std__vector_QueryResult_ = std::vector<QueryResult>;
+  inline std::vector<QueryResult> create_std__vector_QueryResult_(size_t size) noexcept {
+    std::vector<QueryResult> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
   // pragma MARK: std::vector<TransactionQuery>
   /**
    * Specialized version of `std::vector<TransactionQuery>`.
@@ -252,6 +263,15 @@ namespace margelo::nitro::nitrosqlite::bridge::swift {
   }
   inline Result_QueryResult_ create_Result_QueryResult_(const std::exception_ptr& error) noexcept {
     return Result<QueryResult>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::vector<QueryResult>>
+  using Result_std__vector_QueryResult__ = Result<std::vector<QueryResult>>;
+  inline Result_std__vector_QueryResult__ create_Result_std__vector_QueryResult__(const std::vector<QueryResult>& value) noexcept {
+    return Result<std::vector<QueryResult>>::withValue(value);
+  }
+  inline Result_std__vector_QueryResult__ create_Result_std__vector_QueryResult__(const std::exception_ptr& error) noexcept {
+    return Result<std::vector<QueryResult>>::withError(error);
   }
 
 } // namespace margelo::nitro::nitrosqlite::bridge::swift

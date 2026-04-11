@@ -57,7 +57,7 @@ namespace margelo::nitro::nitrosqlite {
       virtual void open(const std::string& path) = 0;
       virtual void close() = 0;
       virtual QueryResult execute(const std::string& query, const std::vector<std::string>& params) = 0;
-      virtual void transaction(const std::vector<TransactionQuery>& queries) = 0;
+      virtual std::vector<QueryResult> transaction(const std::vector<TransactionQuery>& queries) = 0;
 
     protected:
       // Hybrid Setup

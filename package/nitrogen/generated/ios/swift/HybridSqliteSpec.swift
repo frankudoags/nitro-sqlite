@@ -16,7 +16,7 @@ public protocol HybridSqliteSpec_protocol: HybridObject {
   func open(path: String) throws -> Void
   func close() throws -> Void
   func execute(query: String, params: [String]) throws -> QueryResult
-  func transaction(queries: [TransactionQuery]) throws -> Void
+  func transaction(queries: [TransactionQuery]) throws -> [QueryResult]
 }
 
 public extension HybridSqliteSpec_protocol {

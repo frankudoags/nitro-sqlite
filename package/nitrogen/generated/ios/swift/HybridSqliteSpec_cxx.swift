@@ -159,13 +159,20 @@ open class HybridSqliteSpec_cxx {
   }
   
   @inline(__always)
-  public final func transaction(queries: bridge.std__vector_TransactionQuery_) -> bridge.Result_void_ {
+  public final func transaction(queries: bridge.std__vector_TransactionQuery_) -> bridge.Result_std__vector_QueryResult__ {
     do {
-      try self.__implementation.transaction(queries: queries.map({ __item in __item }))
-      return bridge.create_Result_void_()
+      let __result = try self.__implementation.transaction(queries: queries.map({ __item in __item }))
+      let __resultCpp = { () -> bridge.std__vector_QueryResult_ in
+        var __vector = bridge.create_std__vector_QueryResult_(__result.count)
+        for __item in __result {
+          __vector.push_back(__item)
+        }
+        return __vector
+      }()
+      return bridge.create_Result_std__vector_QueryResult__(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
+      return bridge.create_Result_std__vector_QueryResult__(__exceptionPtr)
     }
   }
 }

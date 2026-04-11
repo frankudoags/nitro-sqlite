@@ -89,9 +89,9 @@ namespace margelo::nitro::nitrosqlite {
     }());
     return __result->toCpp();
   }
-  void JHybridSqliteSpec::transaction(const std::vector<TransactionQuery>& queries) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JArrayClass<JTransactionQuery>> /* queries */)>("transaction");
-    method(_javaPart, [&]() {
+  std::vector<QueryResult> JHybridSqliteSpec::transaction(const std::vector<TransactionQuery>& queries) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JArrayClass<JQueryResult>>(jni::alias_ref<jni::JArrayClass<JTransactionQuery>> /* queries */)>("transaction");
+    auto __result = method(_javaPart, [&]() {
       size_t __size = queries.size();
       jni::local_ref<jni::JArrayClass<JTransactionQuery>> __array = jni::JArrayClass<JTransactionQuery>::newArray(__size);
       for (size_t __i = 0; __i < __size; __i++) {
@@ -101,6 +101,16 @@ namespace margelo::nitro::nitrosqlite {
       }
       return __array;
     }());
+    return [&]() {
+      size_t __size = __result->size();
+      std::vector<QueryResult> __vector;
+      __vector.reserve(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        auto __element = __result->getElement(__i);
+        __vector.push_back(__element->toCpp());
+      }
+      return __vector;
+    }();
   }
 
 } // namespace margelo::nitro::nitrosqlite

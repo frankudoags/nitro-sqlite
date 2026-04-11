@@ -101,11 +101,13 @@ namespace margelo::nitro::nitrosqlite {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline void transaction(const std::vector<TransactionQuery>& queries) override {
+    inline std::vector<QueryResult> transaction(const std::vector<TransactionQuery>& queries) override {
       auto __result = _swiftPart.transaction(queries);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
+      auto __value = std::move(__result.value());
+      return __value;
     }
 
   private:
