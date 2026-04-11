@@ -5,15 +5,20 @@ import com.margelo.nitro.NitroModules
 import com.margelo.nitro.nitrosqlite.HybridSqliteSpec
 import com.margelo.nitro.nitrosqlite.QueryResult
 import com.margelo.nitro.nitrosqlite.TransactionQuery
+import android.database.sqlite.SQLiteDatabase
+import android.content.ContentValues
 
 
 class HybridSqlite : HybridSqliteSpec() {
+    private var db: SQLiteDatabase? = null
+
     override fun open(path: String) {
-        TODO("Not yet implemented")
+        db = SQLiteDatabase.openOrCreateDatabase(path, null)
     }
 
     override fun close() {
-        TODO("Not yet implemented")
+        db?.close()
+        db = null
     }
 
     override fun execute(
